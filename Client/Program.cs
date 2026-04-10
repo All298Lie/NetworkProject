@@ -1,4 +1,6 @@
-﻿using System.Net;
+﻿using Newtonsoft.Json;
+using ServerCore;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 
@@ -24,9 +26,15 @@ internal class Program
         // 5. 데이터 통신
         while(true)
         {
+            C2S_Login packet = new C2S_Login();
+            packet.ID = "player1";
+            packet.PW = "1234";
+
+            string json = JsonConvert.SerializeObject(packet);
+
             // 보내기
-            string strLine = Console.ReadLine();
-            byte[] buffer = Encoding.UTF8.GetBytes(strLine);
+            Console.Write($"[To Server] : {json}");
+            byte[] buffer = Encoding.UTF8.GetBytes(json);
             int sendBytes = socket.Send(buffer);
 
             // 받기

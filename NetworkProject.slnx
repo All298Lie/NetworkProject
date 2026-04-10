@@ -1,4 +1,6 @@
 <Solution>
+  <Folder Name="/솔루션 항목/" />
   <Project Path="Client/Client.csproj" />
   <Project Path="NetworkProject/NetworkProject.csproj" />
+  <Project Path="ServerCore/ServerCore.csproj" Id="0b189ca3-ef43-43de-98ab-bba5c477dcc9" />
 </Solution>
