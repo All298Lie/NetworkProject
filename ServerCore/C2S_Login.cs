@@ -1,20 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ServerCore
+﻿namespace ServerCore
 {
     public class C2S_Login : Packet
     {
         public string ID;
         public string PW;
 
-        public C2S_Login()
+        public C2S_Login(string ID, string PW)
         {
-            Type = (int)PacketType.C2S_Login;
+            this.Type = (int)PacketType.C2S_Login;
 
-            ID = "";
-            PW = "";
+            this.ID = ID;
+            this.PW = PW;
         }
     }
 }

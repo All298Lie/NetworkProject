@@ -5,16 +5,13 @@
         None = 0,
         C2S_Login = 1,
         S2C_LoginResult = 2,
-        C2S_Chat = 3
+        C2S_Chat = 3,
+        S2C_Chat = 4,
     }
 
     public abstract class Packet
     {
-        public int Type
-        {
-            get { return Type; }
-            protected set { Type = value; }
-        }
+        public int Type { get; protected set; }
     }
 }
 
