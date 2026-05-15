@@ -1,9 +1,15 @@
-﻿namespace ServerCore
+﻿using Newtonsoft.Json;
+using System.Net.Sockets;
+using System.Text;
+using System.Text.Json.Serialization;
+
+namespace ServerCore
 {
     public static class PacketHelper
     {
-        public static void SendPacket(Socket socket, string json)
+        public static async Task SendPacket(Socket socket, Packet packet)
         {
+            string json = JsonConvert.SerializeObject(packet);
             // 1. Json을 byte[]로 변환
             byte[] jsonBytes = Encoding.UTF8.GetBytes(json);
 
@@ -13,21 +19,21 @@
 
             // 3. header와 payload 붙이기
             byte[] data = new byte[4 + len];
-            Buffer.BlcokCopy(lengthBytes, 0, data, 0, 4);
+            Buffer.BlockCopy(lengthBytes, 0, data, 0, 4);
             Buffer.BlockCopy(jsonBytes, 0, data, 4, len);
 
             // 4. 전송
-            socket.Send(data);
+            await socket.SendAsync(data);
         }
 
-        public static byte[] ReceiveExactly(Socket socket, int length)
+        public static async Task<byte[]> ReceiveExactly(Socket socket, int length)
         {
             byte[] buffer = new byte[length];
             int totalReceived = 0;
 
             while (totalReceived < length)
             {
-                int received = socket.Receive(buffer, totalReceived, length - totalReceived);
+                int received = await socket.ReceiveAsync(new ArraySegment<byte>(buffer, totalReceived, length - totalReceived), SocketFlags.None);
 
                 if (received == 0) throw new SocketException();
 
@@ -37,21 +43,20 @@
             return buffer;
         }
 
-        public static string ReceivePacket(Socket socket)
+        public static async Task<string> ReceivePacket(Socket socket)
         {
             // 1. header 받기
-            byte[] lengthBytes = ReceiveExactly(socket, 4);
+            byte[] lengthBytes = await ReceiveExactly(socket, 4);
             int len = BitConverter.ToInt32(lengthBytes);
 
             // 2. 비정상 길이 체크
             if (len <= 0 || len > 10_000_000) throw new Exception();
 
             // 2. payload 받기
-            byte[] jsonBytes = ReceiveExactly(socket, len);
+            byte[] jsonBytes = await ReceiveExactly(socket, len);
             string json = Encoding.UTF8.GetString(jsonBytes);
 
             return json;
-
         }
     }
 }

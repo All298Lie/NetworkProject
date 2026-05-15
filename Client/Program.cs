@@ -26,13 +26,14 @@ internal class Program
 
         // 5. 로그인 정보 전송
         string playerID = Guid.NewGuid().ToString();
-        string playerPW = "1234";
 
-        C2S_Login loginPacket = new C2S_Login(playerID, playerPW);
+        C2S_LoginReq loginReq = new C2S_LoginReq();
+        loginReq.Nickname = playerID;
 
-        string _json = JsonConvert.SerializeObject(loginPacket);
+        string _json = JsonConvert.SerializeObject(loginReq);
         byte[] _buffer = Encoding.UTF8.GetBytes(_json);
-        int _sendBytes = socket.Send(_buffer);
+        
+        int _sendBytes = socket.SendAsync(_buffer);
 
         // 6. 서버에게 쓰레드를 통해 계속 통신을 받음
         Thread receiveThread = new Thread(() => ReceivePacket(socket));
@@ -46,9 +47,10 @@ internal class Program
 
             if (strLine == null) continue;
 
-            C2S_Chat packet = new C2S_Chat(playerID, strLine);
+            C2S_ChatReq chatReq = new C2S_ChatReq();
+            chatReq.Message = strLine;
 
-            string json = JsonConvert.SerializeObject(packet);
+            string json = JsonConvert.SerializeObject(chatReq);
             byte[] buffer = Encoding.UTF8.GetBytes(json);
             int sendBytes = socket.Send(buffer);
         }
@@ -76,12 +78,15 @@ internal class Program
 
                     switch (type)
                     {
-                        case (int)PacketType.S2C_LoginResult:
+                        case (int)PacketType.S2C_LoginRes:
                             HandleLoginResult(data);
                             break;
 
-                        case (int)PacketType.S2C_Chat:
+                        case (int)PacketType.S2C_ChatRes:
                             HandleChat(data);
+                            break;
+
+                        case (int)PacketType.S2C_ChatNoti:
                             break;
                     }
                 }
